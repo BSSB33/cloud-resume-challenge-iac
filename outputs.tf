@@ -41,6 +41,26 @@ output "cloudfront_domain_name" {
 }
 
 output "website_url" {
-  description = "Website URL"
+  description = "Website URL (CloudFront)"
   value       = "https://${aws_cloudfront_distribution.cloud_resume.domain_name}"
+}
+
+output "custom_domain_url" {
+  description = "Custom domain URL"
+  value       = "https://${var.domain_name}"
+}
+
+output "acm_certificate_arn" {
+  description = "ACM certificate ARN"
+  value       = aws_acm_certificate.cloud_resume.arn
+}
+
+output "route53_zone_id" {
+  description = "Route53 hosted zone ID"
+  value       = data.aws_route53_zone.main.zone_id
+}
+
+output "route53_name_servers" {
+  description = "Route53 name servers"
+  value       = data.aws_route53_zone.main.name_servers
 }

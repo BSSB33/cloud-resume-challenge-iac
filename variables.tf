@@ -9,3 +9,9 @@ variable "environment" {
   type        = string
   default     = "production"
 }
+
+variable "domain_name" {
+  description = "Domain name for the website"
+  type        = string
+  default     = "vitraigabor.eu"
+}

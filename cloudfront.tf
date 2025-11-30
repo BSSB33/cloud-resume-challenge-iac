@@ -16,6 +16,7 @@ resource "aws_cloudfront_distribution" "cloud_resume" {
   comment             = "Cloud Resume Challenge Distribution"
   default_root_object = "index.html"
   price_class         = "PriceClass_100" # Only Europe and North America
+  aliases             = [var.domain_name]
 
   # Origin - S3 Bucket
   origin {
@@ -81,8 +82,9 @@ resource "aws_cloudfront_distribution" "cloud_resume" {
 
   # SSL Certificate
   viewer_certificate {
-    cloudfront_default_certificate = true
-    minimum_protocol_version       = "TLSv1.2_2021"
+    acm_certificate_arn      = aws_acm_certificate_validation.cloud_resume.certificate_arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 
   # Custom Error Responses
