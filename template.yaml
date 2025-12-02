@@ -1,0 +1,515 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Cloud Resume Challenge - Serverless Resume Website Infrastructure'
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Domain Configuration"
+        Parameters:
+          - DomainName
+      - Label:
+          default: "Environment Configuration"
+        Parameters:
+          - Environment
+    ParameterLabels:
+      DomainName:
+        default: "Domain Name"
+      Environment:
+        default: "Environment"
+
+Parameters:
+  DomainName:
+    Type: String
+    Default: vitraigabor.eu
+    Description: Domain name for the website
+
+  Environment:
+    Type: String
+    Default: production
+    Description: Environment name
+    AllowedValues:
+      - production
+      - staging
+      - development
+
+Resources:
+  # ==================== S3 BUCKET ====================
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'vitraiaws-cloud-resume-challenge-${AWS::AccountId}'
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Name
+          Value: cloud-resume-challenge
+        - Key: cloud-resume
+          Value: 'true'
+        - Key: Project
+          Value: cloud-resume-challenge
+        - Key: ManagedBy
+          Value: CloudFormation
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ==================== CLOUDFRONT ====================
+  CloudFrontOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: cloud-resume-s3-oac
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+        Description: Origin Access Control for Cloud Resume S3 bucket
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    DependsOn:
+      - ACMCertificate
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        IPV6Enabled: true
+        Comment: Cloud Resume Challenge Distribution
+        DefaultRootObject: index.html
+        PriceClass: PriceClass_100
+        Aliases:
+          - !Ref DomainName
+        Origins:
+          - DomainName: !GetAtt WebsiteBucket.RegionalDomainName
+            Id: !Sub 'S3-${WebsiteBucket}'
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+            OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
+        DefaultCacheBehavior:
+          TargetOriginId: !Sub 'S3-${WebsiteBucket}'
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachedMethods:
+            - GET
+            - HEAD
+          Compress: true
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # Managed-CachingOptimized
+          ResponseHeadersPolicyId: 67f7725c-6f97-4210-82d7-5512b31e9d03  # Managed-SecurityHeadersPolicy
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: whitelist
+            Locations:
+              - AT  # Austria
+              - BE  # Belgium
+              - BG  # Bulgaria
+              - HR  # Croatia
+              - CY  # Cyprus
+              - CZ  # Czech Republic
+              - DK  # Denmark
+              - EE  # Estonia
+              - FI  # Finland
+              - FR  # France
+              - DE  # Germany
+              - GR  # Greece
+              - HU  # Hungary
+              - IE  # Ireland
+              - IT  # Italy
+              - LV  # Latvia
+              - LT  # Lithuania
+              - LU  # Luxembourg
+              - MT  # Malta
+              - NL  # Netherlands
+              - PL  # Poland
+              - PT  # Portugal
+              - RO  # Romania
+              - SK  # Slovakia
+              - SI  # Slovenia
+              - ES  # Spain
+              - SE  # Sweden
+              - GB  # United Kingdom
+              - CH  # Switzerland
+              - NO  # Norway
+              - IS  # Iceland
+        ViewerCertificate:
+          AcmCertificateArn: !Ref ACMCertificate
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 300
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 300
+      Tags:
+        - Key: Name
+          Value: cloud-resume-cloudfront
+        - Key: cloud-resume
+          Value: 'true'
+        - Key: Project
+          Value: cloud-resume-challenge
+        - Key: ManagedBy
+          Value: CloudFormation
+        - Key: Environment
+          Value: !Ref Environment
+
+  # S3 Bucket Policy for CloudFront
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontServicePrincipal
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub '${WebsiteBucket.Arn}/*'
+            Condition:
+              StringEquals:
+                'AWS:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
+
+  # ==================== ACM CERTIFICATE (us-east-1) ====================
+  # NOTE: This certificate MUST be created in us-east-1 region for CloudFront
+  # Deploy this stack in us-east-1 or use a nested stack/StackSet for cross-region deployment
+  ACMCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref DomainName
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref DomainName
+          HostedZoneId: !Ref HostedZoneId
+      Tags:
+        - Key: Name
+          Value: cloud-resume-certificate
+        - Key: cloud-resume
+          Value: 'true'
+        - Key: Project
+          Value: cloud-resume-challenge
+        - Key: ManagedBy
+          Value: CloudFormation
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ==================== ROUTE53 ====================
+  # NOTE: Assumes Route53 Hosted Zone already exists
+  # Use data source or import existing zone
+  HostedZoneId:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /cloud-resume/route53/hosted-zone-id
+      Type: String
+      Value: PLACEHOLDER_HOSTED_ZONE_ID
+      Description: Route53 Hosted Zone ID for the domain
+
+  Route53RecordIPv4:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt CloudFrontDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2  # CloudFront hosted zone ID (constant)
+        EvaluateTargetHealth: false
+
+  Route53RecordIPv6:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: AAAA
+      AliasTarget:
+        DNSName: !GetAtt CloudFrontDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2  # CloudFront hosted zone ID (constant)
+        EvaluateTargetHealth: false
+
+  # ==================== DYNAMODB ====================
+  ViewCounterTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: cloud-resume-view-counter
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      SSESpecification:
+        SSEEnabled: true
+      Tags:
+        - Key: Name
+          Value: cloud-resume-view-counter
+        - Key: cloud-resume
+          Value: 'true'
+        - Key: Project
+          Value: cloud-resume-challenge
+        - Key: ManagedBy
+          Value: CloudFormation
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ==================== LAMBDA FUNCTION ====================
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: cloud-resume-lambda-view-counter
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: lambda-dynamodb-access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                Resource: !GetAtt ViewCounterTable.Arn
+      Tags:
+        - Key: Name
+          Value: cloud-resume-lambda-role
+        - Key: cloud-resume
+          Value: 'true'
+        - Key: Project
+          Value: cloud-resume-challenge
+        - Key: ManagedBy
+          Value: CloudFormation
+        - Key: Environment
+          Value: !Ref Environment
+
+  ViewCounterFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: cloud-resume-view-counter
+      Runtime: python3.12
+      Handler: index.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 10
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref ViewCounterTable
+          ALLOWED_ORIGIN: !Sub 'https://${DomainName}'
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import os
+          from decimal import Decimal
+
+          # Initialize DynamoDB client
+          dynamodb = boto3.resource('dynamodb')
+          table_name = os.environ['TABLE_NAME']
+          allowed_origin = os.environ['ALLOWED_ORIGIN']
+          table = dynamodb.Table(table_name)
+
+          def lambda_handler(event, context):
+              """
+              Lambda function to increment and return view counter.
+              Protected by CORS - only callable from vitraigabor.eu
+              """
+
+              # Get the origin and referer from the request
+              headers = event.get('headers', {})
+              origin = headers.get('origin', '')
+              referer = headers.get('referer', '')
+
+              # Security check: Verify request comes from allowed domain
+              # Check both origin (for CORS) and referer (for direct calls)
+              is_valid_origin = origin == allowed_origin or origin == ''
+              is_valid_referer = referer.startswith(allowed_origin) or referer == ''
+
+              # Allow if either origin or referer matches (browser sends origin, some tools send referer)
+              if origin and not is_valid_origin:
+                  return {
+                      'statusCode': 403,
+                      'headers': {
+                          'Content-Type': 'application/json',
+                      },
+                      'body': json.dumps({
+                          'error': 'Forbidden',
+                          'message': 'Invalid origin'
+                      })
+                  }
+
+              if referer and not is_valid_referer:
+                  return {
+                      'statusCode': 403,
+                      'headers': {
+                          'Content-Type': 'application/json',
+                      },
+                      'body': json.dumps({
+                          'error': 'Forbidden',
+                          'message': 'Invalid referer'
+                      })
+                  }
+
+              try:
+                  # Increment the view counter atomically
+                  response = table.update_item(
+                      Key={'id': '1'},
+                      UpdateExpression='SET #views = if_not_exists(#views, :start) + :inc',
+                      ExpressionAttributeNames={
+                          '#views': 'views'
+                      },
+                      ExpressionAttributeValues={
+                          ':inc': 1,
+                          ':start': 0
+                      },
+                      ReturnValues='UPDATED_NEW'
+                  )
+
+                  # Get the new view count
+                  new_views = int(response['Attributes']['views'])
+
+                  # Return success response
+                  # Note: CORS headers are automatically added by Lambda Function URL
+                  return {
+                      'statusCode': 200,
+                      'headers': {
+                          'Content-Type': 'application/json',
+                      },
+                      'body': json.dumps({
+                          'views': new_views,
+                          'message': 'View count updated successfully'
+                      })
+                  }
+
+              except Exception as e:
+                  print(f"Error updating view count: {str(e)}")
+
+                  return {
+                      'statusCode': 500,
+                      'headers': {
+                          'Content-Type': 'application/json',
+                      },
+                      'body': json.dumps({
+                          'error': 'Internal Server Error',
+                          'message': 'Failed to update view count'
+                      })
+                  }
+      Tags:
+        - Key: Name
+          Value: cloud-resume-view-counter
+        - Key: cloud-resume
+          Value: 'true'
+        - Key: Project
+          Value: cloud-resume-challenge
+        - Key: ManagedBy
+          Value: CloudFormation
+        - Key: Environment
+          Value: !Ref Environment
+
+  ViewCounterFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      AuthType: NONE
+      TargetFunctionArn: !GetAtt ViewCounterFunction.Arn
+      Cors:
+        AllowOrigins:
+          - !Sub 'https://${DomainName}'
+        AllowMethods:
+          - GET
+          - POST
+        AllowHeaders:
+          - '*'
+        ExposeHeaders:
+          - content-type
+        MaxAge: 86400
+        AllowCredentials: false
+
+  ViewCounterFunctionUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ViewCounterFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: '*'
+      FunctionUrlAuthType: NONE
+
+  # ==================== CLOUDWATCH LOGS ====================
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ViewCounterFunction}'
+      RetentionInDays: 7
+      Tags:
+        - Key: Name
+          Value: cloud-resume-lambda-logs
+        - Key: cloud-resume
+          Value: 'true'
+        - Key: Project
+          Value: cloud-resume-challenge
+        - Key: ManagedBy
+          Value: CloudFormation
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  WebsiteBucketName:
+    Description: S3 bucket name for website hosting
+    Value: !Ref WebsiteBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-WebsiteBucket'
+
+  CloudFrontDistributionId:
+    Description: CloudFront Distribution ID
+    Value: !Ref CloudFrontDistribution
+    Export:
+      Name: !Sub '${AWS::StackName}-CloudFrontDistribution'
+
+  CloudFrontDomainName:
+    Description: CloudFront Distribution Domain Name
+    Value: !GetAtt CloudFrontDistribution.DomainName
+    Export:
+      Name: !Sub '${AWS::StackName}-CloudFrontDomainName'
+
+  WebsiteURL:
+    Description: Website URL
+    Value: !Sub 'https://${DomainName}'
+
+  LambdaFunctionArn:
+    Description: Lambda Function ARN
+    Value: !GetAtt ViewCounterFunction.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-LambdaFunction'
+
+  LambdaFunctionUrl:
+    Description: Lambda Function URL
+    Value: !GetAtt ViewCounterFunctionUrl.FunctionUrl
+    Export:
+      Name: !Sub '${AWS::StackName}-LambdaFunctionUrl'
+
+  DynamoDBTableName:
+    Description: DynamoDB Table Name
+    Value: !Ref ViewCounterTable
+    Export:
+      Name: !Sub '${AWS::StackName}-DynamoDBTable'
+
+  ACMCertificateArn:
+    Description: ACM Certificate ARN
+    Value: !Ref ACMCertificate
+    Export:
+      Name: !Sub '${AWS::StackName}-ACMCertificate'
