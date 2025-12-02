@@ -64,3 +64,13 @@ output "route53_name_servers" {
   description = "Route53 name servers"
   value       = data.aws_route53_zone.main.name_servers
 }
+
+output "lambda_function_url" {
+  description = "Lambda Function URL for view counter"
+  value       = aws_lambda_function_url.view_counter.function_url
+}
+
+output "dynamodb_table_name" {
+  description = "DynamoDB table name for view counter"
+  value       = aws_dynamodb_table.view_counter.name
+}

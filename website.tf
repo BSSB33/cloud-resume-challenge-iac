@@ -37,7 +37,8 @@ resource "aws_s3_object" "website_files" {
   etag         = filemd5("${local.website_path}/${each.key}")
 
   # Cache control headers for CloudFront
-  cache_control = each.key == "index.html" ? "max-age=300, must-revalidate" : "max-age=31536000, immutable"
+  # HTML: 5 minutes, Static assets (CSS/JS/images): 1 week
+  cache_control = each.key == "index.html" ? "max-age=300, must-revalidate" : "max-age=604800"
 
   tags = {
     Name         = each.value
