@@ -6,6 +6,8 @@ Metadata:
     ManagedBy: Terraform
     StateBackend: S3
     StateLocation: vitraiaws-terraform-states/cloud-resume-challenge/terraform.tfstate
+    StateLocking: DynamoDB
+    StateLockTable: terraform-state-locks
 
 Parameters:
   DomainName:
@@ -134,6 +136,18 @@ Resources:
         - AttributeName: id
           KeyType: HASH
 
+  TerraformStateLockTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: terraform-state-locks
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: LockID
+          AttributeType: S
+      KeySchema:
+        - AttributeName: LockID
+          KeyType: HASH
+
   # ==================== IAM ROLE ====================
   LambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -240,6 +254,10 @@ Outputs:
   DynamoDBTableName:
     Description: DynamoDB Table Name (cloud-resume-view-counter)
     Value: !Ref ViewCounterTable
+
+  TerraformStateLockTableName:
+    Description: DynamoDB Table for Terraform State Locking (terraform-state-locks)
+    Value: !Ref TerraformStateLockTable
 
   ACMCertificateArn:
     Description: ACM Certificate ARN (cloud-resume-certificate)

@@ -20,6 +20,7 @@ resource "aws_iam_role" "lambda_view_counter" {
   tags = {
     Name         = "cloud-resume-lambda-role"
     cloud-resume = "true"
+    Environment  = "production"
   }
 }
 
