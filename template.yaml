@@ -5,7 +5,7 @@ Metadata:
   Infrastructure:
     ManagedBy: Terraform
     StateBackend: S3
-    StateLocation: vitraiaws-cloud-resume-terraform-state/cloud-resume-challenge/terraform.tfstate
+    StateLocation: vitraiaws-terraform-states/cloud-resume-challenge/terraform.tfstate
 
 Parameters:
   DomainName:
@@ -18,7 +18,7 @@ Resources:
   TerraformStateBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: vitraiaws-cloud-resume-terraform-state
+      BucketName: vitraiaws-terraform-states
 
   # ==================== S3 WEBSITE BUCKET ====================
   WebsiteBucket:
@@ -214,7 +214,7 @@ Outputs:
     Value: !Ref WebsiteBucket
 
   TerraformStateBucketName:
-    Description: S3 bucket storing Terraform state (vitraiaws-cloud-resume-terraform-state)
+    Description: S3 bucket storing Terraform state (vitraiaws-terraform-states)
     Value: !Ref TerraformStateBucket
 
   CloudFrontDistributionId:
