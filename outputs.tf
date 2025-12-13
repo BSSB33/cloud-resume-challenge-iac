@@ -13,18 +13,6 @@ output "s3_bucket_region" {
   value       = aws_s3_bucket.cloud_resume.region
 }
 
-output "uploaded_files" {
-  description = "List of uploaded website files"
-  value       = keys(aws_s3_object.website_files)
-}
-
-output "website_files_etags" {
-  description = "ETags of uploaded files (for cache invalidation)"
-  value = {
-    for key, obj in aws_s3_object.website_files : key => obj.etag
-  }
-}
-
 output "cloudfront_distribution_id" {
   description = "CloudFront distribution ID"
   value       = aws_cloudfront_distribution.cloud_resume.id
