@@ -222,6 +222,41 @@ Resources:
       LogGroupName: !Sub '/aws/lambda/${ViewCounterFunction}'
       RetentionInDays: 7
 
+  # ==================== MONITORING ====================
+  CloudFrontAlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: cloud-resume-cloudfront-alerts
+      DisplayName: CloudFront API Call Alerts
+      Subscription:
+        - Endpoint: vitraig@gmail.com
+          Protocol: email
+
+  CloudFrontMonitoringRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: cloud-resume-cloudfront-api-monitoring
+      Description: Detect CloudFront API calls (create, update, delete operations)
+      EventPattern:
+        source:
+          - aws.cloudfront
+        detail-type:
+          - AWS API Call via CloudTrail
+        detail:
+          eventSource:
+            - cloudfront.amazonaws.com
+          eventName:
+            - CreateDistribution
+            - UpdateDistribution
+            - DeleteDistribution
+            - CreateOriginAccessControl
+            - UpdateOriginAccessControl
+            - DeleteOriginAccessControl
+      State: ENABLED
+      Targets:
+        - Arn: !Ref CloudFrontAlertsTopic
+          Id: SendToSNS
+
 Outputs:
   WebsiteBucketName:
     Description: S3 bucket name for website hosting (vitraiaws-cloud-resume-challenge)
@@ -266,3 +301,11 @@ Outputs:
   HostedZoneId:
     Description: Route53 Hosted Zone ID (vitraigabor.eu)
     Value: !Ref HostedZone
+
+  CloudFrontAlertsTopicArn:
+    Description: SNS Topic ARN for CloudFront alerts
+    Value: !Ref CloudFrontAlertsTopic
+
+  CloudFrontMonitoringRuleName:
+    Description: EventBridge rule name for CloudFront API monitoring
+    Value: !Ref CloudFrontMonitoringRule

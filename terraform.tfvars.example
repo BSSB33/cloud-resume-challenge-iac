@@ -1,0 +1,7 @@
+# Example Terraform Variables
+# Copy this file to terraform.tfvars and fill in your values
+# terraform.tfvars is gitignored to keep sensitive data out of version control
+
+# Email address for CloudFront monitoring alerts
+alert_email = "your-email@example.com"
+alert_email = "vitraig@gmail.com"

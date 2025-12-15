@@ -21,3 +21,9 @@ variable "aws_profile" {
   type        = string
   default     = ""
 }
+
+variable "alert_email" {
+  description = "Email address for CloudFront monitoring alerts"
+  type        = string
+  sensitive   = true
+}

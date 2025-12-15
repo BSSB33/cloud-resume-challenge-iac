@@ -62,3 +62,13 @@ output "dynamodb_table_name" {
   description = "DynamoDB table name for view counter"
   value       = aws_dynamodb_table.view_counter.name
 }
+
+output "cloudfront_alerts_topic_arn" {
+  description = "SNS topic ARN for CloudFront alerts"
+  value       = aws_sns_topic.cloudfront_alerts.arn
+}
+
+output "cloudfront_monitoring_rule" {
+  description = "EventBridge rule name for CloudFront API monitoring"
+  value       = aws_cloudwatch_event_rule.cloudfront_api_calls.name
+}
