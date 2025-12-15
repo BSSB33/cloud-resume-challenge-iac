@@ -2,7 +2,7 @@
 
 resource "aws_sns_topic" "cloudfront_alerts" {
   name         = "cloud-resume-cloudfront-alerts"
-  display_name = "CloudFront API Call Alerts"
+  display_name = "CDN Monitoring Alerts"
 
   tags = {
     cloud-resume = "true"
@@ -77,16 +77,6 @@ resource "aws_cloudwatch_event_target" "cloudfront_to_sns" {
       region    = "$.detail.awsRegion"
     }
 
-    input_template = <<EOF
-"CloudFront API Call Detected"
-
-Event: <eventName>
-Time: <time>
-User: <user>
-Source IP: <sourceIP>
-Region: <region>
-
-This is an automated alert from your Cloud Resume Challenge infrastructure monitoring.
-EOF
+    input_template = "\"CloudFront API Call Detected\\n\\nEvent: <eventName>\\nTime: <time>\\nUser: <user>\\nSource IP: <sourceIP>\\nRegion: <region>\\n\\nThis is an automated alert from your Cloud Resume Challenge infrastructure monitoring.\""
   }
 }
