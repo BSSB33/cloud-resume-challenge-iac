@@ -15,3 +15,9 @@ variable "domain_name" {
   type        = string
   default     = "vitraigabor.eu"
 }
+
+variable "aws_profile" {
+  description = "AWS CLI profile to use (empty for default credential chain)"
+  type        = string
+  default     = ""
+}

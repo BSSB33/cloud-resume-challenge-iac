@@ -10,8 +10,7 @@ terraform {
 }
 
 provider "aws" {
-  region  = var.aws_region
-  profile = "vitraigabor"
+  region = var.aws_region
 
   default_tags {
     tags = {
@@ -24,9 +23,8 @@ provider "aws" {
 
 # Provider alias for us-east-1 (required for CloudFront certificates)
 provider "aws" {
-  alias   = "us_east_1"
-  region  = "us-east-1"
-  profile = "vitraigabor"
+  alias  = "us_east_1"
+  region = "us-east-1"
 
   default_tags {
     tags = {
