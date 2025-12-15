@@ -1,0 +1,14 @@
+
+.terraform/
+
+.terraform.lock.hcl
+
+terraform.tfstate
+
+terraform.tfstate.backup
+
+.DS_Store
+
+# Terraform variable files (contains sensitive data)
+terraform.tfvars
+*.auto.tfvars
