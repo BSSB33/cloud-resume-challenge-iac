@@ -1,9 +1,9 @@
 # DynamoDB Table for View Counter
 
 resource "aws_dynamodb_table" "view_counter" {
-  name           = "cloud-resume-view-counter"
-  billing_mode   = "PAY_PER_REQUEST" # On-demand pricing (free tier eligible)
-  hash_key       = "id"
+  name         = "cloud-resume-view-counter"
+  billing_mode = "PAY_PER_REQUEST" # On-demand pricing (free tier eligible)
+  hash_key     = "id"
 
   attribute {
     name = "id"

@@ -73,7 +73,7 @@ resource "aws_lambda_function" "view_counter" {
 
   environment {
     variables = {
-      TABLE_NAME  = aws_dynamodb_table.view_counter.name
+      TABLE_NAME     = aws_dynamodb_table.view_counter.name
       ALLOWED_ORIGIN = "https://${var.domain_name}"
     }
   }
