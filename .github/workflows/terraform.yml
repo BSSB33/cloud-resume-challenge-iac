@@ -43,7 +43,7 @@ jobs:
 
       - name: Terraform Init
         id: init
-        run: terraform init
+        run: terraform init -backend-config="profile="
 
       - name: Terraform Validate
         id: validate
@@ -118,7 +118,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -backend-config="profile="
 
       - name: Download Plan
         uses: actions/download-artifact@v4
