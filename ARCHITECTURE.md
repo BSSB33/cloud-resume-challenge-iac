@@ -139,23 +139,23 @@ JavaScript updates counter in sidebar
 ## Security Features
 
 ### Network Security
-- ✅ HTTPS only (HTTP → HTTPS redirect)
-- ✅ Geo-restriction (Europe only)
-- ✅ TLS 1.2 minimum
-- ✅ S3 bucket private (no public access)
-- ✅ Origin Access Control (CloudFront → S3)
+- HTTPS only (HTTP → HTTPS redirect)
+- Geo-restriction (Europe only)
+- TLS 1.2 minimum
+- S3 bucket private (no public access)
+- Origin Access Control (CloudFront → S3)
 
 ### API Security
-- ✅ CORS (browser-only from vitraigabor.eu)
-- ✅ Referer header validation
-- ⚠️ Lambda Function URL is public (can be called directly)
+- CORS (browser-only from vitraigabor.eu)
+- Referer header validation
+- Lambda Function URL is public (can be called directly)
 
 ### Infrastructure Security
-- ✅ Terraform state encrypted
-- ✅ S3 versioning enabled
-- ✅ IAM least privilege
-- ✅ No hardcoded credentials
-- ✅ SSO authentication
+- Terraform state encrypted
+- S3 versioning enabled
+- IAM least privilege
+- No hardcoded credentials
+- SSO authentication
 
 ## Cost Breakdown
 
@@ -224,13 +224,13 @@ cloud-resume-challenge-iac/
 
 ## Architecture Patterns Used
 
-✅ **Serverless**: No EC2 instances to manage
-✅ **Infrastructure as Code**: Everything in Terraform
-✅ **Static Site Generation**: Pre-built HTML/CSS/JS
-✅ **Microservices**: Lambda for specific function
-✅ **Immutable Infrastructure**: Replace, don't modify
-✅ **Single Responsibility**: Each component has one job
-✅ **Least Privilege**: IAM policies minimal permissions
+ **Serverless**: No EC2 instances to manage
+ **Infrastructure as Code**: Everything in Terraform
+ **Static Site Generation**: Pre-built HTML/CSS/JS
+ **Microservices**: Lambda for specific function
+ **Immutable Infrastructure**: Replace, don't modify
+ **Single Responsibility**: Each component has one job
+ **Least Privilege**: IAM policies minimal permissions
 
 ## Future Improvements
 

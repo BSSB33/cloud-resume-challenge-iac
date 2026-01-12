@@ -7,11 +7,11 @@ A fully serverless resume website built on AWS, deployed using Infrastructure as
 ![CloudFormation](https://img.shields.io/badge/CloudFormation-FF4F00?style=flat&logo=amazon-aws&logoColor=white)
 ![Python](https://img.shields.io/badge/python-3670A0?style=flat&logo=python&logoColor=ffdd54)
 
-## 🌐 Live Demo
+## Live Demo
 
 Visit the live website: [vitraigabor.eu](https://vitraigabor.eu)
 
-## 🏗️ Architecture
+## Architecture
 
 This project implements a modern serverless architecture on AWS:
 
@@ -34,7 +34,7 @@ User → Route53 → CloudFront → S3 (Static Website)
 - **IAM** - Security and permissions
 - **CloudWatch** - Logging and monitoring
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -67,7 +67,7 @@ terraform apply
 
 See [CLOUDFORMATION-README.md](CLOUDFORMATION-README.md) for detailed CloudFormation deployment instructions.
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 .
@@ -96,38 +96,38 @@ See [CLOUDFORMATION-README.md](CLOUDFORMATION-README.md) for detailed CloudForma
 └── template-composer.yaml       # AWS Application Composer template
 ```
 
-## 🎯 Features
+## Features
 
 ### Infrastructure
-- ✅ 100% Infrastructure as Code (Terraform + CloudFormation)
-- ✅ Remote state management (S3 backend)
-- ✅ Multi-region deployment (eu-west-1 + us-east-1 for ACM)
-- ✅ Modular Terraform configuration
+- 100% Infrastructure as Code (Terraform + CloudFormation)
+- Remote state management (S3 backend)
+- Multi-region deployment (eu-west-1 + us-east-1 for ACM)
+- Modular Terraform configuration
 
 ### Security
-- ✅ HTTPS only (HTTP redirects to HTTPS)
-- ✅ Private S3 bucket with Origin Access Control (OAC)
-- ✅ Geo-restriction (Europe only)
-- ✅ TLS 1.2 minimum
-- ✅ CORS protection on Lambda
-- ✅ IAM least privilege
-- ✅ Encryption at rest (S3, DynamoDB, Terraform state)
--  IP-based rate limiting (1 increment/hour per IP)
--  Client-side session tracking to prevent spam
+- HTTPS only (HTTP redirects to HTTPS)
+- Private S3 bucket with Origin Access Control (OAC)
+- Geo-restriction (Europe only)
+- TLS 1.2 minimum
+- CORS protection on Lambda
+- IAM least privilege
+- Encryption at rest (S3, DynamoDB, Terraform state)
+- IP-based rate limiting (1 increment/hour per IP)
+- Client-side session tracking to prevent spam
 
 ### Performance
-- ✅ Global CDN with edge caching (CloudFront)
-- ✅ Serverless architecture (Lambda + DynamoDB)
-- ✅ On-demand scaling
-- ✅ 1-week cache TTL for static content
+- Global CDN with edge caching (CloudFront)
+- Serverless architecture (Lambda + DynamoDB)
+- On-demand scaling
+- 1-week cache TTL for static content
 
 ### Cost Optimization
-- ✅ ~$0.50/month total cost (only Route53 hosted zone)
-- ✅ All services within AWS Free Tier
-- ✅ On-demand billing for Lambda and DynamoDB
-- ✅ CloudFront Price Class 100 (EU + NA only)
+- ~$0.50/month total cost (only Route53 hosted zone)
+- All services within AWS Free Tier
+- On-demand billing for Lambda and DynamoDB
+- CloudFront Price Class 100 (EU + NA only)
 
-##  View Counter Rate Limiting
+## View Counter Rate Limiting
 
 The view counter implements a **layered defense strategy** to prevent abuse:
 
@@ -155,7 +155,7 @@ The view counter implements a **layered defense strategy** to prevent abuse:
    → IP not rate limited? → Increment counter + update rate limit
 ```
 
-##  Common Operations
+## Common Operations
 
 ### Update Website Content
 
@@ -200,7 +200,7 @@ aws dynamodb get-item \
   --profile vitraigabor
 ```
 
-## 📊 Outputs
+## Outputs
 
 After deployment, Terraform provides:
 
@@ -211,7 +211,7 @@ After deployment, Terraform provides:
 - `lambda_function_url` - Lambda Function URL for API
 - `dynamodb_table_name` - DynamoDB table name
 
-## 🔧 Configuration
+## Configuration
 
 ### Variables
 
@@ -239,7 +239,7 @@ All resources are tagged with:
 - `ManagedBy = "Terraform"` (or `CloudFormation`)
 - `Environment = "production"`
 
-## 💰 Cost Breakdown
+## Cost Breakdown
 
 | Service | Monthly Cost | Notes |
 |---------|--------------|-------|
@@ -251,13 +251,13 @@ All resources are tagged with:
 | ACM Certificate | FREE | Always free |
 | **Total** | **~$0.50/month** | + $8-13/year domain |
 
-## 📚 Documentation
+## Documentation
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Detailed architecture diagram and flow
 - [CLAUDE.md](CLAUDE.md) - AI assistant context for development
 - [CLOUDFORMATION-README.md](CLOUDFORMATION-README.md) - CloudFormation deployment guide
 
-## 🎓 Learning Resources
+## Learning Resources
 
 This project implements the [Cloud Resume Challenge](https://cloudresumechallenge.dev/):
 - Infrastructure as Code
@@ -266,21 +266,21 @@ This project implements the [Cloud Resume Challenge](https://cloudresumechalleng
 - Cloud security best practices
 - Cost optimization
 
-## 🤝 Contributing
+## Contributing
 
 This is a personal project for the Cloud Resume Challenge, but suggestions and improvements are welcome!
 
-## 📝 License
+## License
 
 This project is open source and available under the MIT License.
 
-## 👤 Author
+## Author
 
 **Gabor Vitrai**
 - Website: [vitraigabor.eu](https://vitraigabor.eu)
 - GitHub: [@gabor-sd](https://github.com/gabor-sd)
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [The Cloud Resume Challenge](https://cloudresumechallenge.dev/) by Forrest Brazeal
 - AWS for providing free tier resources
