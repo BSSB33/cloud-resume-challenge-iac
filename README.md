@@ -19,6 +19,8 @@ This project implements a modern serverless architecture on AWS:
 User → Route53 → CloudFront → S3 (Static Website)
                             ↓
                     Lambda Function URL → DynamoDB (View Counter)
+                                       ↓
+                                       DynamoDB (Rate Limiting)
 ```
 
 ### Services Used
@@ -110,6 +112,8 @@ See [CLOUDFORMATION-README.md](CLOUDFORMATION-README.md) for detailed CloudForma
 - ✅ CORS protection on Lambda
 - ✅ IAM least privilege
 - ✅ Encryption at rest (S3, DynamoDB, Terraform state)
+-  IP-based rate limiting (1 increment/hour per IP)
+-  Client-side session tracking to prevent spam
 
 ### Performance
 - ✅ Global CDN with edge caching (CloudFront)
@@ -123,7 +127,35 @@ See [CLOUDFORMATION-README.md](CLOUDFORMATION-README.md) for detailed CloudForma
 - ✅ On-demand billing for Lambda and DynamoDB
 - ✅ CloudFront Price Class 100 (EU + NA only)
 
-## 🛠️ Common Operations
+##  View Counter Rate Limiting
+
+The view counter implements a **layered defense strategy** to prevent abuse:
+
+### Client-Side Protection (Layer 1)
+- Uses `sessionStorage` to track unique browser sessions
+- Only increments counter on first visit within a session
+- Prevents accidental refresh spam from legitimate users
+- Bypassed by closing tab or incognito mode
+
+### Server-Side IP Rate Limiting (Layer 2)
+- Tracks visitor IPs in DynamoDB `cloud-resume-visitor-rate-limits` table
+- **Rate limit:** 1 increment per IP per hour (3600 seconds)
+- Automatic cleanup via DynamoDB TTL (24-hour expiration)
+- Protection against bot attacks and malicious scripts
+
+### How It Works
+```
+1. User visits page → Frontend checks sessionStorage
+   → Already counted this session? → Show count only
+   → New session? → Request increment
+
+2. Lambda receives request → Extract client IP
+   → Check rate limit table
+   → IP incremented < 1 hour ago? → Return current count
+   → IP not rate limited? → Increment counter + update rate limit
+```
+
+##  Common Operations
 
 ### Update Website Content
 

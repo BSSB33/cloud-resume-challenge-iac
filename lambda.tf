@@ -39,6 +39,14 @@ resource "aws_iam_role_policy" "lambda_dynamodb" {
           "dynamodb:UpdateItem"
         ]
         Resource = aws_dynamodb_table.view_counter.arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem"
+        ]
+        Resource = aws_dynamodb_table.visitor_rate_limits.arn
       }
     ]
   })
@@ -73,8 +81,9 @@ resource "aws_lambda_function" "view_counter" {
 
   environment {
     variables = {
-      TABLE_NAME     = aws_dynamodb_table.view_counter.name
-      ALLOWED_ORIGIN = "https://${var.domain_name}"
+      TABLE_NAME            = aws_dynamodb_table.view_counter.name
+      RATE_LIMIT_TABLE_NAME = aws_dynamodb_table.visitor_rate_limits.name
+      ALLOWED_ORIGIN        = "https://${var.domain_name}"
     }
   }
 
