@@ -34,3 +34,28 @@ resource "aws_dynamodb_table_item" "initial_counter" {
     ignore_changes = [item] # Don't overwrite the item on subsequent applies
   }
 }
+
+# DynamoDB Table for IP-based Rate Limiting
+
+resource "aws_dynamodb_table" "visitor_rate_limits" {
+  name         = "cloud-resume-visitor-rate-limits"
+  billing_mode = "PAY_PER_REQUEST" # On-demand pricing (free tier eligible)
+  hash_key     = "ip"
+
+  attribute {
+    name = "ip"
+    type = "S" # String - stores visitor IP address
+  }
+
+  # TTL to automatically delete old rate limit records after 24 hours
+  ttl {
+    attribute_name = "ttl"
+    enabled        = true
+  }
+
+  tags = {
+    Name         = "cloud-resume-visitor-rate-limits"
+    cloud-resume = "true"
+    Purpose      = "Rate limiting for view counter"
+  }
+}
