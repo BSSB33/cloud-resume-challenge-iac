@@ -32,7 +32,10 @@
                 "s3:GetReplicationConfiguration",
                 "s3:GetAccelerateConfiguration"
             ],
-            "Resource": "arn:aws:s3:::vitraiaws-cloud-resume-challenge"
+            "Resource": [
+                "arn:aws:s3:::vitraiaws-cloud-resume-challenge",
+                "arn:aws:s3:::vitraiaws-ik-website"
+            ]
         },
         {
             "Sid": "LambdaManagement",
