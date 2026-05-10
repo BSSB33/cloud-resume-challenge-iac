@@ -1,0 +1,28 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "InvalidateCloudFrontDistributions",
+            "Effect": "Allow",
+            "Action": [
+                "cloudfront:CreateInvalidation",
+                "cloudfront:GetInvalidation"
+            ],
+            "Resource": "arn:aws:cloudfront::971725886961:distribution/*"
+        },
+        {
+            "Sid": "ManageCloudFrontFunctions",
+            "Effect": "Allow",
+            "Action": [
+                "cloudfront:CreateFunction",
+                "cloudfront:DeleteFunction",
+                "cloudfront:DescribeFunction",
+                "cloudfront:GetFunction",
+                "cloudfront:ListFunctions",
+                "cloudfront:PublishFunction",
+                "cloudfront:UpdateFunction"
+            ],
+            "Resource": "arn:aws:cloudfront::971725886961:function/*"
+        }
+    ]
+}

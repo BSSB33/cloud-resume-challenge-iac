@@ -1,5 +1,17 @@
 # CloudFront Distribution Configuration
 
+# CloudFront Function - redirects vitraigabor.eu → resume.vitraigabor.eu
+resource "aws_cloudfront_function" "redirect_root_to_resume" {
+  name    = "cloud-resume-redirect-root"
+  runtime = "cloudfront-js-2.0"
+  publish = true
+  code    = file("${path.module}/cloudfront-functions/redirect_root_to_resume.js")
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 # Origin Access Control (OAC) - Modern replacement for OAI
 resource "aws_cloudfront_origin_access_control" "cloud_resume" {
   name                              = "cloud-resume-s3-oac"
@@ -16,7 +28,7 @@ resource "aws_cloudfront_distribution" "cloud_resume" {
   comment             = "Cloud Resume Challenge Distribution"
   default_root_object = "index.html"
   price_class         = "PriceClass_100" # Only Europe and North America
-  aliases             = [var.domain_name]
+  aliases             = [var.domain_name, "resume.${var.domain_name}"]
 
   # Origin - S3 Bucket
   origin {
@@ -38,6 +50,11 @@ resource "aws_cloudfront_distribution" "cloud_resume" {
 
     # Response Headers Policy - Managed SecurityHeadersPolicy
     response_headers_policy_id = "67f7725c-6f97-4210-82d7-5512b31e9d03"
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.redirect_root_to_resume.arn
+    }
   }
 
   # Geo Restriction - Europe only

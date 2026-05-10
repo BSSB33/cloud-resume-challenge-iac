@@ -83,7 +83,8 @@ resource "aws_lambda_function" "view_counter" {
     variables = {
       TABLE_NAME            = aws_dynamodb_table.view_counter.name
       RATE_LIMIT_TABLE_NAME = aws_dynamodb_table.visitor_rate_limits.name
-      ALLOWED_ORIGIN        = "https://${var.domain_name}"
+      ALLOWED_ORIGINS       = "https://${var.domain_name},https://resume.${var.domain_name}"
+      COUNTING_ORIGIN       = "https://resume.${var.domain_name}"
     }
   }
 
@@ -99,7 +100,7 @@ resource "aws_lambda_function_url" "view_counter" {
   authorization_type = "NONE" # Public URL, but protected by CORS
 
   cors {
-    allow_origins     = ["https://${var.domain_name}"]
+    allow_origins     = ["https://${var.domain_name}", "https://resume.${var.domain_name}"]
     allow_methods     = ["GET", "POST"]
     allow_headers     = ["*"]
     expose_headers    = ["content-type"]

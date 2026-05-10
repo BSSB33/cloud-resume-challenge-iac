@@ -31,3 +31,55 @@ resource "aws_route53_record" "website_ipv6" {
     evaluate_target_health = false
   }
 }
+
+# Route53 A Record (IPv4) - resume subdomain
+resource "aws_route53_record" "resume_ipv4" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = "resume.${var.domain_name}"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.cloud_resume.domain_name
+    zone_id                = aws_cloudfront_distribution.cloud_resume.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# Route53 AAAA Record (IPv6) - resume subdomain
+resource "aws_route53_record" "resume_ipv6" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = "resume.${var.domain_name}"
+  type    = "AAAA"
+
+  alias {
+    name                   = aws_cloudfront_distribution.cloud_resume.domain_name
+    zone_id                = aws_cloudfront_distribution.cloud_resume.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# Route53 A Record (IPv4) - ik subdomain
+resource "aws_route53_record" "ik_ipv4" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = "ik.${var.domain_name}"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.ik_website.domain_name
+    zone_id                = aws_cloudfront_distribution.ik_website.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# Route53 AAAA Record (IPv6) - ik subdomain
+resource "aws_route53_record" "ik_ipv6" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = "ik.${var.domain_name}"
+  type    = "AAAA"
+
+  alias {
+    name                   = aws_cloudfront_distribution.ik_website.domain_name
+    zone_id                = aws_cloudfront_distribution.ik_website.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
