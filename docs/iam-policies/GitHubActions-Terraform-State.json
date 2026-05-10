@@ -1,0 +1,34 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "TerraformStateAccess",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket",
+                "s3:GetBucketVersioning"
+            ],
+            "Resource": "arn:aws:s3:::vitraiaws-terraform-states"
+        },
+        {
+            "Sid": "TerraformStateFileAccess",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject"
+            ],
+            "Resource": "arn:aws:s3:::vitraiaws-terraform-states/cloud-resume-challenge/*"
+        },
+        {
+            "Sid": "TerraformStateLocking",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:DeleteItem"
+            ],
+            "Resource": "arn:aws:dynamodb:eu-west-1:971725886961:table/terraform-state-locks"
+        }
+    ]
+}
