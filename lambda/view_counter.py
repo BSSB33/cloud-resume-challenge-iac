@@ -8,7 +8,8 @@ from decimal import Decimal
 dynamodb = boto3.resource('dynamodb')
 table_name = os.environ['TABLE_NAME']
 rate_limit_table_name = os.environ['RATE_LIMIT_TABLE_NAME']
-allowed_origin = os.environ['ALLOWED_ORIGIN']
+allowed_origins = [o.strip() for o in os.environ['ALLOWED_ORIGINS'].split(',')]
+counting_origin = os.environ['COUNTING_ORIGIN']
 table = dynamodb.Table(table_name)
 rate_limit_table = dynamodb.Table(rate_limit_table_name)
 
@@ -26,10 +27,10 @@ def lambda_handler(event, context):
     origin = headers.get('origin', '')
     referer = headers.get('referer', '')
 
-    # Security check: Verify request comes from allowed domain
+    # Security check: Verify request comes from an allowed domain
     # Check both origin (for CORS) and referer (for direct calls)
-    is_valid_origin = origin == allowed_origin or origin == ''
-    is_valid_referer = referer.startswith(allowed_origin) or referer == ''
+    is_valid_origin = origin == '' or origin in allowed_origins
+    is_valid_referer = referer == '' or any(referer.startswith(o) for o in allowed_origins)
 
     # Allow if either origin or referer matches (browser sends origin, some tools send referer)
     if origin and not is_valid_origin:
@@ -96,8 +97,11 @@ def lambda_handler(event, context):
                 print(f"Rate limit check error: {e}")
                 # Continue anyway - don't block on rate limit failures
 
+        # Only count visits originating from the resume subdomain
+        is_counting_origin = origin == counting_origin or referer.startswith(counting_origin)
+
         # Determine if we should increment based on client request and rate limiting
-        perform_increment = should_increment and not rate_limited
+        perform_increment = should_increment and not rate_limited and is_counting_origin
 
         if perform_increment:
             # Increment the view counter atomically

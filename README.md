@@ -50,6 +50,10 @@ User → Route53 → CloudFront → S3 (Static Website)
 git clone <repository-url>
 cd cloud-resume-challenge-iac
 
+# Login using sso
+aws sso login --profile <profile-name>
+eval $(aws configure export-credentials --profile <profile-name> --format env)
+
 # Initialize Terraform
 terraform init
 
