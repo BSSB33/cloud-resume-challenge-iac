@@ -72,3 +72,18 @@ output "cloudfront_monitoring_rule" {
   description = "EventBridge rule name for CloudFront API monitoring"
   value       = aws_cloudwatch_event_rule.cloudfront_api_calls.name
 }
+
+output "ik_website_bucket_name" {
+  description = "IK website S3 bucket name"
+  value       = aws_s3_bucket.ik_website.id
+}
+
+output "ik_website_cloudfront_distribution_id" {
+  description = "IK website CloudFront distribution ID"
+  value       = aws_cloudfront_distribution.ik_website.id
+}
+
+output "ik_website_url" {
+  description = "IK website URL"
+  value       = "https://ik.${var.domain_name}"
+}
