@@ -27,3 +27,9 @@ variable "alert_email" {
   type        = string
   sensitive   = true
 }
+
+variable "gallery_auth_credentials" {
+  description = "Base64-encoded Basic Auth credentials for the gallery (echo -n 'user:pass' | base64)"
+  type        = string
+  sensitive   = true
+}

@@ -9,11 +9,12 @@
             ],
             "Resource": [
                 "arn:aws:s3:::vitraiaws-cloud-resume-challenge",
-                "arn:aws:s3:::vitraiaws-ik-website"
+                "arn:aws:s3:::vitraiaws-ik-website",
+                "arn:aws:s3:::vitraiaws-photos-backup-thumbnails"
             ]
         },
         {
-            "Sid": "ManageBucketObjects",
+            "Sid": "ManageWebsiteBucketObjects",
             "Effect": "Allow",
             "Action": [
                 "s3:PutObject",
@@ -25,6 +26,15 @@
                 "arn:aws:s3:::vitraiaws-cloud-resume-challenge/*",
                 "arn:aws:s3:::vitraiaws-ik-website/*"
             ]
+        },
+        {
+            "Sid": "ManageGalleryBucketObjects",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject"
+            ],
+            "Resource": "arn:aws:s3:::vitraiaws-photos-backup-thumbnails/*"
         }
     ]
 }

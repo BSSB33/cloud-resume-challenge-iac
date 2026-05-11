@@ -4,4 +4,7 @@
 
 # Email address for CloudFront monitoring alerts
 alert_email = "your-email@example.com"
-alert_email = "vitraig@gmail.com"
+
+# Base64-encoded Basic Auth credentials for gallery.vitraigabor.eu
+# Generate with: echo -n "username:password" | base64
+gallery_auth_credentials = ""
