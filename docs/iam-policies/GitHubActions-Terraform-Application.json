@@ -34,7 +34,8 @@
             ],
             "Resource": [
                 "arn:aws:s3:::vitraiaws-cloud-resume-challenge",
-                "arn:aws:s3:::vitraiaws-ik-website"
+                "arn:aws:s3:::vitraiaws-ik-website",
+                "arn:aws:s3:::vitraiaws-photos-backup-thumbnails"
             ]
         },
         {

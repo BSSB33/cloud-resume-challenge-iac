@@ -16,7 +16,14 @@
                 "cloudfront:CreateOriginAccessControl",
                 "cloudfront:GetOriginAccessControl",
                 "cloudfront:UpdateOriginAccessControl",
-                "cloudfront:DeleteOriginAccessControl"
+                "cloudfront:DeleteOriginAccessControl",
+                "cloudfront:CreateFunction",
+                "cloudfront:GetFunction",
+                "cloudfront:UpdateFunction",
+                "cloudfront:DeleteFunction",
+                "cloudfront:DescribeFunction",
+                "cloudfront:PublishFunction",
+                "cloudfront:TestFunction"
             ],
             "Resource": "*"
         },

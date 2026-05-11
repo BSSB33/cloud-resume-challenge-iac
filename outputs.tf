@@ -87,3 +87,13 @@ output "ik_website_url" {
   description = "IK website URL"
   value       = "https://ik.${var.domain_name}"
 }
+
+output "gallery_cloudfront_distribution_id" {
+  description = "Gallery CloudFront distribution ID"
+  value       = aws_cloudfront_distribution.gallery.id
+}
+
+output "gallery_url" {
+  description = "Gallery URL"
+  value       = "https://gallery.${var.domain_name}"
+}
