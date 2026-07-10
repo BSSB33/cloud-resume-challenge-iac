@@ -10,7 +10,11 @@ function handler(event) {
             headers: {
                 'www-authenticate': { value: 'Basic realm="Vitrai Gallery"' },
                 'content-type': { value: 'text/html; charset=utf-8' },
-                'cache-control': { value: 'no-store' }
+                'cache-control': { value: 'no-store' },
+                // Any 401 (i.e. logging out) makes the browser drop everything
+                // it cached from this origin, so stale app files can't survive
+                // a logout/login cycle
+                'clear-site-data': { value: '"cache"' }
             },
             body: '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
                 + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
