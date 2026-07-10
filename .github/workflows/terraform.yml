@@ -15,6 +15,7 @@ env:
   AWS_REGION: eu-west-1
   TF_VERSION: 1.9.0
   TF_VAR_alert_email: ${{ secrets.ALERT_EMAIL }}
+  TF_VAR_gallery_auth_credentials: ${{ secrets.TF_VAR_GALLERY_AUTH_CREDENTIALS }}
 
 jobs:
   terraform-check:

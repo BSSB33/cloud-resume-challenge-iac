@@ -79,6 +79,12 @@ resource "aws_lambda_function" "view_counter" {
   runtime          = "python3.12"
   timeout          = 10
 
+  # No reserved_concurrent_executions: the account's total Lambda concurrency
+  # limit is 10, which AWS requires to stay fully unreserved (min 10) and which
+  # already caps this public Function URL at 10 concurrent executions.
+  # If the account limit is ever raised, add a reservation here to keep the
+  # flood-cost bound.
+
   environment {
     variables = {
       TABLE_NAME            = aws_dynamodb_table.view_counter.name

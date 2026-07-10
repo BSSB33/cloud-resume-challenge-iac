@@ -58,7 +58,10 @@
                 "lambda:RemovePermission",
                 "lambda:GetPolicy",
                 "lambda:ListVersionsByFunction",
-                "lambda:GetFunctionCodeSigningConfig"
+                "lambda:GetFunctionCodeSigningConfig",
+                "lambda:PutFunctionConcurrency",
+                "lambda:DeleteFunctionConcurrency",
+                "lambda:GetFunctionConcurrency"
             ],
             "Resource": "arn:aws:lambda:eu-west-1:971725886961:function:cloud-resume-view-counter"
         },
