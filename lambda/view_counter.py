@@ -2,6 +2,7 @@ import json
 import boto3
 import os
 import time
+from datetime import datetime, timezone
 from decimal import Decimal
 
 # Initialize DynamoDB client
@@ -15,6 +16,36 @@ rate_limit_table = dynamodb.Table(rate_limit_table_name)
 
 # Rate limit configuration - 1 hour window
 RATE_LIMIT_WINDOW_SECONDS = 3600
+
+# Item id of the all-time counter
+TOTAL_COUNTER_ID = '1'
+
+def current_week_id():
+    """Item id of the current ISO week's counter (UTC, weeks start on Monday), e.g. 'week#2026-W42'.
+    Uses the ISO year, which can differ from the calendar year around New Year."""
+    year, week, _ = datetime.now(timezone.utc).isocalendar()
+    return f"week#{year}-W{week:02d}"
+
+def increment_counter(item_id):
+    """Atomically increment a counter item (created on first use) and return the new value."""
+    response = table.update_item(
+        Key={'id': item_id},
+        UpdateExpression='SET #views = if_not_exists(#views, :start) + :inc',
+        ExpressionAttributeNames={
+            '#views': 'views'
+        },
+        ExpressionAttributeValues={
+            ':inc': 1,
+            ':start': 0
+        },
+        ReturnValues='UPDATED_NEW'
+    )
+    return int(response['Attributes']['views'])
+
+def read_counter(item_id):
+    """Return a counter's value, or 0 if the item doesn't exist yet (e.g. a new week)."""
+    item = table.get_item(Key={'id': item_id}).get('Item')
+    return int(item['views']) if item else 0
 
 def lambda_handler(event, context):
     """
@@ -103,20 +134,11 @@ def lambda_handler(event, context):
         # Determine if we should increment based on client request and rate limiting
         perform_increment = should_increment and not rate_limited and is_counting_origin
 
+        week_id = current_week_id()
+
         if perform_increment:
-            # Increment the view counter atomically
-            response = table.update_item(
-                Key={'id': '1'},
-                UpdateExpression='SET #views = if_not_exists(#views, :start) + :inc',
-                ExpressionAttributeNames={
-                    '#views': 'views'
-                },
-                ExpressionAttributeValues={
-                    ':inc': 1,
-                    ':start': 0
-                },
-                ReturnValues='UPDATED_NEW'
-            )
+            # Increment the all-time counter atomically
+            new_views = increment_counter(TOTAL_COUNTER_ID)
 
             # Update rate limit record
             if client_ip != 'unknown':
@@ -131,13 +153,16 @@ def lambda_handler(event, context):
                 except Exception as e:
                     print(f"Failed to update rate limit: {e}")
                     # Don't fail the request if rate limit update fails
-
-            # Get the new view count
-            new_views = int(response['Attributes']['views'])
         else:
             # Just get the current count without incrementing
-            response = table.get_item(Key={'id': '1'})
-            new_views = int(response['Item']['views'])
+            new_views = read_counter(TOTAL_COUNTER_ID)
+
+        # Weekly counter is best-effort: a failure here must not hide the all-time count
+        week_views = None
+        try:
+            week_views = increment_counter(week_id) if perform_increment else read_counter(week_id)
+        except Exception as e:
+            print(f"Weekly counter error: {e}")
 
         # Return success response
         # Note: CORS headers are automatically added by Lambda Function URL
@@ -148,6 +173,8 @@ def lambda_handler(event, context):
             },
             'body': json.dumps({
                 'views': new_views,
+                'week_views': week_views,
+                'week': week_id.split('#', 1)[1],
                 'message': 'View count updated successfully'
             })
         }

@@ -86,7 +86,7 @@ terraform state rm <resource_address>
 2. Lambda validates Origin/Referer headers against `ALLOWED_ORIGINS`
 3. Lambda checks IP rate limit (1 increment per hour per IP, `visitor_rate_limits` table with 24h TTL)
 4. Only requests originating from `COUNTING_ORIGIN` (the resume subdomain) increment the counter
-5. Lambda performs atomic increment on the DynamoDB item and returns the count as JSON
+5. Lambda atomically increments the all-time item and the current ISO week's item, and returns `{views, week_views, week}` as JSON (the weekly counter is best-effort: on failure `week_views` is `null` and the total is still returned)
 
 ### Geo Restrictions
 - Resume and IK distributions: whitelist of European countries
@@ -158,7 +158,7 @@ When modifying Lambda code:
 3. Check CloudWatch logs: `/aws/lambda/cloud-resume-view-counter`
 
 ### DynamoDB Tables
-- `cloud-resume-view-counter`: partition key `id` (String); single item `id = "1"` with `views` (Number), atomically incremented. Initial item created by Terraform with `ignore_changes` so applies don't reset the count.
+- `cloud-resume-view-counter`: partition key `id` (String). Item `id = "1"` holds the all-time `views` (Number), atomically incremented; initial item created by Terraform with `ignore_changes` so applies don't reset the count. Weekly items `id = "week#YYYY-Www"` (ISO week in UTC, ISO year, e.g. `week#2026-W42`) are created by the Lambda on the first counted visit of each week via `if_not_exists`; they are not managed by Terraform and are kept indefinitely (~52 items/year).
 - `cloud-resume-visitor-rate-limits`: partition key `ip` (String), `ttl` attribute auto-expires records after 24h. Used for the 1-increment-per-hour-per-IP limit.
 - Both on-demand billing (pay per request).
 
